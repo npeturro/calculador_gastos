@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gráfico de Ingresos y Gastos</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #chart-container {
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
+    }
+
+    #statistics {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Gráfico de Ingresos y Gastos</h1>
+  <div>
+    <label for="income">Ingresos:</label>
+    <input type="number" id="income" />
+    <button onclick="addData('income')">Agregar Ingreso</button>
+  </div>
+  <div>
+    <label for="expense">Gastos:</label>
+    <input type="number" id="expense" />
+    <button onclick="addData('expense')">Agregar Gasto</button>
+  </div>
+  <div id="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
+  <div id="statistics">
+    <h2>Estadísticas</h2>
+    <p>Total de Ingresos: <span id="total-income">0</span></p>
+    <p>Total de Gastos: <span id="total-expense">0</span></p>
+    <p>Saldo: <span id="balance">0</span></p>
+    <p>Porcentaje de Ingresos: <span id="income-percentage">0</span>%</p>
+    <p>Porcentaje de Gastos: <span id="expense-percentage">0</span>%</p>
+  </div>
+
+  <script>
+    var data = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: ['rgba(0, 123, 255, 0.5)', 'rgba(255, 0, 0, 0.5)'],
+        borderColor: ['rgba(0, 123, 255, 1)', 'rgba(255, 0, 0, 1)'],
+        borderWidth: 1
+      }]
+    };
+
+    var options = {
+      responsive: true,
+      maintainAspectRatio: false
+    };
+
+    var ctx = document.getElementById('chart').getContext('2d');
+    var chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: data,
+      options: options
+    });
+
+    function addData(type) {
+      var inputValue = parseFloat(document.getElementById(type).value);
+      if (!isNaN(inputValue)) {
+        var label = type.charAt(0).toUpperCase() + type.slice(1);
+        chart.data.labels.push(label);
+        chart.data.datasets[0].data.push(inputValue);
+        chart.update();
+
+        updateStatistics();
+      }
+    }
+
+    function updateStatistics() {
+      var totalIncome = 0;
+      var totalExpense = 0;
+
+      for (var i = 0; i < chart.data.labels.length; i++) {
+        var label = chart.data.labels[i];
+        var value = chart.data.datasets[0].data[i];
+
+        if (label === 'Income') {
+          totalIncome += value;
+        } else if (label === 'Expense') {
+          totalExpense += value;
+        }
+      }
+
+      var balance = totalIncome - totalExpense;
+      var incomePercentage = calculatePercentage(totalIncome, totalIncome + totalExpense);
+      var expensePercentage = calculatePercentage(totalExpense, totalIncome + totalExpense);
+
+      document.getElementById('total-income').textContent = totalIncome.toFixed(2);
+      document.getElementById('total-expense').textContent = totalExpense.toFixed(2);
+      document.getElementById('balance').textContent = balance.toFixed(2);
+      document.getElementById('income-percentage').textContent = incomePercentage.toFixed(2);
+      document.getElementById('expense-percentage').textContent = expensePercentage.toFixed(2);
+    }
+
+    function calculatePercentage(value, total) {
+      return (value / total) * 100;
+    }
+  </script>
+</body>
+</html>
+
+
